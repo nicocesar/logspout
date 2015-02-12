@@ -20,6 +20,14 @@ type Log struct {
 	Data string `json:"data"`
 }
 
+type LogstashEvent struct {
+	Source      string `json:"source"`
+	Source_host string `json:"source_host"`
+	Type        string `json:"type"`
+	Tags        string `json:"tags"`
+	Message     string `json:"message"`
+}
+
 type Route struct {
 	ID     string  `json:"id"`
 	Source *Source `json:"source,omitempty"`

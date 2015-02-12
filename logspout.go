@@ -62,8 +62,6 @@ func (c Colorizer) Get(key string) string {
 func rabbitmqStreamer(target Target, types []string, logstream chan *Log) {
 	typestr := "," + strings.Join(types, ",") + ","
 
-	log.Printf("Ehrmegerd")
-
     // Connects opens an AMQP connection from the credentials in the URL.
     conn, err := amqp.Dial(os.Args[1])
     if err != nil {
@@ -84,7 +82,9 @@ func rabbitmqStreamer(target Target, types []string, logstream chan *Log) {
 		if typestr != ",," && !strings.Contains(typestr, logline.Type) {
 			continue
 		}
-
+		hostname,err := os.Hostname()
+		line := LogstashEvent{"logspout", hostname, "logspout", logline.Name, logline.Data}
+		thing := marshal(line)
 		// We declare our topology on both the publisher and consumer to ensure they
 		// are the same.  This is part of AMQP being a programmable messaging model.
 		//
@@ -98,14 +98,14 @@ func rabbitmqStreamer(target Target, types []string, logstream chan *Log) {
     		// Prepare this message to be persistent.  Your publishing requirements may
     		// be different.
     	msg := amqp.Publishing{
-        	//Headers: amqp.Table{},
+        	Headers: amqp.Table{},
         	//ContentType: "text/plain",
         	//ContentEncoding: "UTF-8",
     		//    DeliveryMode: amqp.Transient,
         	DeliveryMode: amqp.Persistent,
         	Priority: 0,
         	Timestamp:    time.Now(),
-        	Body:         []byte(logline.Data),
+        	Body:         thing,
     	}
 
     	// This is not a mandatory delivery, so it will be dropped if there are no
